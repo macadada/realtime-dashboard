@@ -14,6 +14,8 @@ import { Label } from "@/components/ui/label"
 import { Badge } from "@/components/ui/badge";
 import confetti from 'canvas-confetti';
 import { tools } from "@/lib/tools";
+import { GithubIcon } from "lucide-react";
+import Link from "next/link";
 
 const App: React.FC = () => {
   const [voice, setVoice] = useState("ash");
@@ -45,12 +47,19 @@ const App: React.FC = () => {
 
   return (
     <main className="min-h-screen overflow-scroll bg-gradient-to-b from-gray-50 to-white flex items-center">
-      <div className="border rounded-lg shadow-lg container flex flex-col items-center justify-center mx-auto max-w-3xl px-4 py-12 mb-12">
+      <div className="bg-stone-100 border rounded-lg shadow-lg container flex flex-col items-center justify-center mx-auto max-w-3xl px-4 py-12 mb-12">
         {/* Hero Section */}
         <div className="text-center mb-12">
-          <Badge className="text-xl mb-4 font-medium">
-            shadcn/ui starter kit
-          </Badge>
+          <div className="flex justify-center items-center mx-auto gap-2 h-full w-full mb-2">
+            <Badge className="text-xl font-medium">
+              shadcn/ui starter kit
+            </Badge>
+            <Link href="https://github.com/cameronking4/shadcn-openai-realtime-webrtc">
+              <Button className="shadow-md rounded-full" variant="outline">
+                <GithubIcon />
+              </Button>
+            </Link>
+          </div>
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
             OpenAI WebRTC Audio Demo
           </h1>
@@ -143,28 +152,40 @@ const App: React.FC = () => {
         <div className="w-full mt-8 items-center text-center px-12">
           <h1 className="text-xl font-semibold mt-4">Example Tools</h1>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Get Current Time</h3>
-              <p className="text-gray-600 text-sm">Gets the current time in your timezone</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Change Background Color</h3>
-              <p className="text-gray-600 text-sm">Changes the background color of this page</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Party Mode</h3>
-              <p className="text-gray-600 text-sm">Triggers a confetti animation on the page</p>
-            </div>
-            <div className="text-center p-4 border rounded-lg">
-              <h3 className="font-semibold mb-2">Launch Website</h3>
-              <p className="text-gray-600 text-sm">Launches a website in a new tab</p>
-            </div>
+            {toolHints.map((tool, index) => (
+              <div
+                key={index}
+                className="bg-background text-center p-4 border rounded-lg"
+              >
+                <h3 className="font-semibold mb-2">{tool.title}</h3>
+                <p className="text-gray-600 text-sm">{tool.description}</p>
+              </div>
+            ))}
           </div>
         </div>
       </div>
     </main>
   );
 };
+
+const toolHints = [
+  {
+    title: "Get Current Time",
+    description: "Gets the current time in your timezone",
+  },
+  {
+    title: "Change Background Color",
+    description: "Changes the background color of this page",
+  },
+  {
+    title: "Party Mode",
+    description: "Triggers a confetti animation on the page",
+  },
+  {
+    title: "Launch Website",
+    description: "Launches a website in a new tab",
+  },
+];
 
 const timeFunction = () => {
   const now = new Date();
