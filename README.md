@@ -1,9 +1,8 @@
-# OpenAI WebRTC Shadcn/UI Next.js Starter
+# OpenAI WebRTC Shadcn Next15 Starter
 
 This is a WebRTC-based audio streaming application using `OpenAI`'s `Realtime WebRTC API`. Project contains `/api` route and UI components developed with `Next.js` and `shadcn/ui`. It supports real-time audio conversations implented in [skrivov/openai-voice-webrtc-next](https://github.com/skrivov/openai-voice-webrtc-next) with the addition of a hook to abstract the WebRTC handling.
 
-
-https://github.com/user-attachments/assets/48d0aaea-ad42-41cb-b167-2357d1c8e3f9
+https://github.com/user-attachments/assets/b97f28da-734d-4165-b9b3-c3a386401198
 
 
 ## Features
