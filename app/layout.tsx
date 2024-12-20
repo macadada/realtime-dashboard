@@ -56,7 +56,7 @@ export default function RootLayout({
             <div className="w-full bg-gradient-to-r from-gray-900 to-gray-700 py-2">
               <div className="container mx-auto px-4 text-center text-white text-sm">
                 🎉 Check out the new OpenAI Realtime Blocks UI Library for Next.js! 
-                <a href="https://blocks.ui" className="underline ml-2 hover:text-gray-200">
+                <a href="https://openai-realtime-blocks.vercel.app" className="underline ml-2 hover:text-gray-200">
                   Learn more →
                 </a>
               </div>
