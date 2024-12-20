@@ -16,6 +16,9 @@ import confetti from 'canvas-confetti';
 import { tools } from "@/lib/tools";
 import { GithubIcon } from "lucide-react";
 import Link from "next/link";
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from "@/components/ui/accordion";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const App: React.FC = () => {
   const [voice, setVoice] = useState("ash");
@@ -46,10 +49,10 @@ const App: React.FC = () => {
   }, [registerFunction]);
 
   return (
-    <main className="min-h-screen overflow-scroll bg-gradient-to-b from-gray-50 to-white flex items-center">
-      <div className="bg-stone-100 border rounded-lg shadow-lg container flex flex-col items-center justify-center mx-auto max-w-3xl px-4 py-12 mb-12">
+    <main className="min-h-screen">
+      <div className="my-12 container flex flex-col items-center justify-center mx-auto max-w-3xl px-4 py-12 border rounded-lg shadow-xl">
         {/* Hero Section */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-12 rounded-lg p-4">
           <div className="flex justify-center items-center mx-auto gap-2 h-full w-full mb-2">
             <Badge className="text-xl font-medium">
               shadcn/ui starter kit
@@ -60,16 +63,16 @@ const App: React.FC = () => {
               </Button>
             </Link>
           </div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold mb-4">
             OpenAI WebRTC Audio Demo
           </h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
+          <p className="max-w-2xl mx-auto">
             Experience real-time voice AI powered by OpenAI&apos;s latest API (12/17/2024)<br/>
           </p>
         </div>
 
         {/* Main Controls Card */}
-        <div className="w-full max-w-md bg-white rounded-xl shadow-lg p-6 space-y-4">
+        <div className="w-full max-w-md bg-card text-card-foreground rounded-xl border shadow-sm p-6 space-y-4">
           <div className="form-group space-y-2">
             <Label htmlFor="voiceSelect" className="text-sm font-medium">Select Voice</Label>
             <Select value={voice} onValueChange={setVoice}>
@@ -114,38 +117,87 @@ const App: React.FC = () => {
               >
                 {status}
               </div>
+
+
               {/* Token Usage Summary */} 
               <div className="space-y-4">
-              {msgs.filter(msg => msg.type === 'response.done').slice(-1).map((msg, index) => (
-                <div key={`usage-${index}`} className="bg-slate-50 p-4 rounded-lg">
-                  <h4 className="font-medium mb-2">Token Usage</h4>
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div>Total Tokens:</div>
-                    <div>{msg.response.usage.total_tokens}</div>
-                    <div>Input Tokens:</div>
-                    <div>{msg.response.usage.input_tokens}</div>
-                    <div>Output Tokens:</div>
-                    <div>{msg.response.usage.output_tokens}</div>
-                  </div>
-                </div>
-              ))}
-              {/* Messages */}
-              <Button
-                variant="outline"
-                className="w-full"
-                onClick={() => {
-                  msgs.forEach(msg => {
-                    console.log(`Message Type: ${msg.type}`);
-                    console.log(JSON.stringify(msg, null, 2));
-                  });
-                }}
-              >
-                Log Messages to Console
-              </Button>
-            </div>
-          </div>
-          )}
+                {msgs.filter(msg => msg.type === 'response.done').slice(-1).map((msg, index) => (
+                  <Accordion type="single" collapsible key={`usage-${index}`} className="w-full text-center">
+                    <AccordionItem value="token-usage">
+                      <AccordionTrigger>Token Usage</AccordionTrigger>
+                      <AccordionContent>
+                        <Table>
+                          <TableBody>
+                            <TableRow>
+                              <TableCell className="font-medium">Total Tokens</TableCell>
+                              <TableCell>{msg.response.usage.total_tokens}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Input Tokens</TableCell>
+                              <TableCell>{msg.response.usage.input_tokens}</TableCell>
+                            </TableRow>
+                            <TableRow>
+                              <TableCell className="font-medium">Output Tokens</TableCell>
+                              <TableCell>{msg.response.usage.output_tokens}</TableCell>
+                            </TableRow>
+                          </TableBody>
+                        </Table>
+                      </AccordionContent>
+                    </AccordionItem>
+                  </Accordion>
+                ))}
+              </div>
 
+              
+              {/* Messages */}
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    msgs.forEach(msg => {
+                      console.log(`Message Type: ${msg.type}`);
+                      console.log(JSON.stringify(msg, null, 2));
+                    });
+                  }}
+                >
+                  Log Messages to Console
+                </Button>
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="flex-1">
+                      View Message Logs
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+                    <DialogHeader>
+                      <DialogTitle>Message Logs</DialogTitle>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Content</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {msgs.map((msg, i) => (
+                            <TableRow key={i}>
+                              <TableCell className="font-medium">{msg.type}</TableCell>
+                              <TableCell className="font-mono text-sm">
+                                {JSON.stringify(msg, null, 2)}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Tools Education Section */}
@@ -158,7 +210,7 @@ const App: React.FC = () => {
                 className="bg-background text-center p-4 border rounded-lg"
               >
                 <h3 className="font-semibold mb-2">{tool.title}</h3>
-                <p className="text-gray-600 text-sm">{tool.description}</p>
+                <p className="text-sm">{tool.description}</p>
               </div>
             ))}
           </div>
