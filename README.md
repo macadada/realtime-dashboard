@@ -2,8 +2,7 @@
 
 This is a WebRTC-based audio streaming application using `OpenAI`'s `Realtime WebRTC API`. Project contains `/api` route and UI components developed with `Next.js` and `shadcn/ui`. It supports real-time audio conversations implented in [skrivov/openai-voice-webrtc-next](https://github.com/skrivov/openai-voice-webrtc-next) with the addition of a hook to abstract the WebRTC handling.
 
-https://github.com/user-attachments/assets/b97f28da-734d-4165-b9b3-c3a386401198
-
+https://github.com/user-attachments/assets/ea9324af-5c18-48d2-b980-2b81baeea4c0
 
 ## Features
 - **Next.js Framework**: Built with Next.js for server-side rendering and API routes.
