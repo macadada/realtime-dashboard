@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Tool } from "@/lib/tools";
+import { Conversation } from "@/lib/conversations";
 
 const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
   const [status, setStatus] = useState("");
@@ -12,8 +13,13 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const dataChannelRef = useRef<RTCDataChannel | null>(null);
   const [msgs, setMsgs] = useState<any[]>([]);
+  const [conversation, setConversation] = useState<any[]>([]);
+
   // Add function registry
   const functionRegistry = useRef<Record<string, Function>>({});
+  const [currentVolume, setCurrentVolume] = useState(0);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const volumeIntervalRef = useRef<number | null>(null);
 
   // Add method to register tool functions
   const registerFunction = (name: string, fn: Function) => {
@@ -37,6 +43,55 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
   const handleDataChannelMessage = async (event: MessageEvent) => {
     try {
       const msg = JSON.parse(event.data);
+      
+      if (msg.type === 'response.audio_transcript.delta') {
+        // Add new message or update existing one
+        const newMessage: Conversation = {
+          role: 'assistant',
+          text: msg.delta,
+          timestamp: new Date().toISOString(),
+          isFinal: false
+        };
+        
+        setConversation(prev => {
+          const lastMsg = prev[prev.length - 1];
+          if (lastMsg && !lastMsg.isFinal && lastMsg.role === 'assistant') {
+            // Update existing message
+            const updatedMessages = [...prev];
+            updatedMessages[prev.length - 1] = {
+              ...lastMsg,
+              text: lastMsg.text + msg.delta
+            };
+            return updatedMessages;
+          } else {
+            // Add new message
+            return [...prev, newMessage];
+          }
+        });
+      }
+
+      if (msg.type === 'response.audio_transcript.done') {
+        // Mark last message as final
+        setConversation(prev => {
+          const updatedMessages = [...prev];
+          if (updatedMessages.length > 0) {
+            updatedMessages[updatedMessages.length - 1].isFinal = true;
+          }
+          return updatedMessages;
+        });
+      }
+
+      if (msg.type === 'input_audio_buffer.committed') {
+        // Add user message
+        const userMessage: Conversation = {
+          role: 'user',
+          text: msg.transcript || '',
+          timestamp: new Date().toISOString(),
+          isFinal: true
+        };
+        setConversation(prev => [...prev, userMessage]);
+      }
+
       if (msg.type === 'response.function_call_arguments.done') {
         const fn = functionRegistry.current[msg.name];
         if (fn) {
@@ -55,6 +110,7 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
           dataChannelRef.current?.send(JSON.stringify(response));
         }
       }
+
       setMsgs(prevMsgs => [...prevMsgs, msg]);
       return msg;
     } catch (error) {
@@ -105,6 +161,22 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
     audioContextRef.current = audioContext;
   };
 
+  const getVolume = (): number => {
+    if (!analyserRef.current) return 0;
+
+    const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+    analyserRef.current.getByteTimeDomainData(dataArray);
+
+    // Calculate RMS (Root Mean Square)
+    let sum = 0;
+    for (let i = 0; i < dataArray.length; i++) {
+      const float = (dataArray[i] - 128) / 128;
+      sum += float * float;
+    }
+    
+    return Math.sqrt(sum / dataArray.length);
+  };
+
   const startSession = async () => {
     try {
       setStatus("Requesting microphone access...");
@@ -121,7 +193,30 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
       const pc = new RTCPeerConnection();
       const audioEl = document.createElement("audio");
       audioEl.autoplay = true;
-      pc.ontrack = (e) => (audioEl.srcObject = e.streams[0]);
+      
+      pc.ontrack = (e) => {
+        audioEl.srcObject = e.streams[0];
+        
+        // Set up audio analysis
+        const audioContext = new (window.AudioContext || window.AudioContext)();
+        const source = audioContext.createMediaStreamSource(e.streams[0]);
+        const analyser = audioContext.createAnalyser();
+        analyser.fftSize = 256;
+        
+        source.connect(analyser);
+        analyserRef.current = analyser;
+
+        // Start volume monitoring
+        volumeIntervalRef.current = window.setInterval(() => {
+          const volume = getVolume();
+          setCurrentVolume(volume);
+          
+          // Optional: Log when speech is detected
+        //   if (volume > 0.1) {
+        //     console.log('Speech detected with volume:', volume);
+        //   }
+        }, 100);
+      };
 
       // Add data channel
       const dataChannel = pc.createDataChannel('response');
@@ -189,9 +284,20 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
       audioIndicatorRef.current.classList.remove("active");
     }
 
+    if (volumeIntervalRef.current) {
+      clearInterval(volumeIntervalRef.current);
+      volumeIntervalRef.current = null;
+    }
+    
+    if (analyserRef.current) {
+      analyserRef.current = null;
+    }
+    
+    setCurrentVolume(0);
     setIsSessionActive(false);
     setStatus("");
     setMsgs([]);
+    setConversation([]);
   };
 
   const handleStartStopClick = () => {
@@ -210,7 +316,9 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
     stopSession,
     handleStartStopClick,
     registerFunction,
-    msgs
+    msgs,
+    currentVolume,
+    conversation
   };
 };
 

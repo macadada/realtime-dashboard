@@ -38,6 +38,19 @@ const toolDefinitions = {
             description: 'The URL to launch'
         }
         }
+    },
+    copyToClipboard: {
+        description: 'Copies text to the user\'s clipboard',
+        parameters: {
+        text: {
+            type: 'string',
+            description: 'The text to copy'
+        }
+        }
+    },
+    takeScreenshot: {
+        description: 'Takes a screenshot of the current page',
+        parameters: {}
     }
 } as const;
 

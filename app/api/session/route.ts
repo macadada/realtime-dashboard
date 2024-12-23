@@ -17,7 +17,6 @@ export async function POST() {
                 voice: "alloy",
                 modalities: ["audio", "text"],
                 instructions:"Start conversation with the user by saying 'Hello, how can I help you today?'",
-                tools: tools,
                 tool_choice: "auto",
             }),
         });
@@ -35,34 +34,3 @@ export async function POST() {
         return NextResponse.json({ error: "Failed to fetch session data" }, { status: 500 });
     }
 }
-
-
-const tools = [
-    {
-        "type": "function",
-        "name": "getPageHTML",
-        "description": "Gets the HTML for the current page",
-        "parameters": {
-            "type": "object",
-            "properties": {}
-        }
-    },
-    {
-        "type": "function", 
-        "name": "getWeather",
-        "description": "Gets the current weather",
-        "parameters": {
-            "type": "object",
-            "properties": {}
-        }
-    },
-    {
-        "type": "function",
-        "name": "getCurrentTime",
-        "description": "Gets the current time",
-        "parameters": {
-            "type": "object",
-            "properties": {}
-        }
-    },
-];
