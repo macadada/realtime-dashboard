@@ -12,6 +12,7 @@ import { MessageControls } from "./components/MessageControls"
 import { ToolsEducation } from "./components/ToolsEducation"
 import { motion } from "framer-motion"
 import { timeFunction, backgroundFunction, partyFunction, launchWebsite, takeScreenshot, copyToClipboard } from "./components/tools-functions"
+import { Toaster } from "@/components/ui/sonner"
 
 const App: React.FC = () => {
   // State for voice selection
@@ -80,6 +81,7 @@ const App: React.FC = () => {
           <ToolsEducation />
         </div>
       </motion.div>
+      <Toaster />
     </main>
   )
 }

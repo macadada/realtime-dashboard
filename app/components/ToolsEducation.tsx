@@ -13,16 +13,16 @@ import {
 
 const AVAILABLE_TOOLS = [
   {
-    name: "Copy to Clipboard",
-    description: 'Say "Copy to clipboard [text]" to copy text to the clipboard.',
+    name: "Copy Fn",
+    description: 'Say "Copy that to clipboard" to paste it somewhere.',
   },
   {
     name: "Get Time",
-    description: 'Ask "What time is it?" to get the current time.',
+    description: 'Ask "Tell me what time is it?" to get current time.',
   },
   {
-    name: "Background Color",
-    description: 'Say "Change background to [color]" to change the page background.',
+    name: "Theme Switcher",
+    description: 'Say "Change background" or "Switch to dark mode" or "Switch to light mode".',
   },
   {
     name: "Party Mode",
@@ -30,7 +30,7 @@ const AVAILABLE_TOOLS = [
   },
   {
     name: "Launch Website",
-    description: 'Say "Open website [URL]" to launch a website in a new tab.',
+    description: '"Take me to [website]" to launch a site in a new tab.',
   },
 ] as const;
 

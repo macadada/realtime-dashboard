@@ -4,6 +4,7 @@ import { toast } from "sonner"
 import confetti from 'canvas-confetti'
 import { animate as framerAnimate } from "framer-motion"
 
+
 export const timeFunction = () => {
   const now = new Date()
   return {
@@ -14,28 +15,29 @@ export const timeFunction = () => {
   }
 }
 
-export const backgroundFunction = ({ color }: { color: string }) => {
-  const currentColor = document.body.style.backgroundColor;
+export const backgroundFunction = () => {
   try {
-    const mainElement = document.querySelector('main')
-    if (mainElement) {
-      mainElement.classList.remove('bg-gradient-to-b', 'from-gray-50', 'to-white')
-      mainElement.style.backgroundColor = color
-    }
-    toast("Background color changed! 🎉", {
-        description: `Background color changed to ${color}`,
-        action: {
-          label: "Undo",
-          onClick: () => {
-            if (mainElement) {
-              mainElement.style.backgroundColor = currentColor
-            }
-          },
-        },
-      })
-    return { success: true, color, message: `Background color changed to ${color}` }
+    const html = document.documentElement;
+    const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+    html.classList.remove(currentTheme);
+    html.classList.add(newTheme);
+
+    toast(`Switched to ${newTheme} mode! 🌓`, {
+      description: `Theme changed to ${newTheme} mode`,
+    })
+
+    return { 
+      success: true, 
+      theme: newTheme,
+      message: `Switched to ${newTheme} mode`
+    };
   } catch (error) {
-    return { success: false, message: `Failed to change background color: ${error}` }
+    return { 
+      success: false, 
+      message: `Failed to switch theme: ${error}` 
+    };
   }
 }
 
@@ -121,13 +123,9 @@ export const partyFunction = () => {
     }
 
     animate()
-    toast("Party mode activated! 🎉", {
-        description: "Party mode activated! 🎉",
-        action: {
-          label: "Undo",
-          onClick: () => console.log("Undo"),
-        },
-      })
+    toast.success("Party mode! 🎉", {
+      description: "Party mode activated!",
+    })
     return { success: true, message: "Party mode activated! 🎉" }
   } catch (error) {
     return { success: false, message: `Failed to trigger party mode: ${error}` }
@@ -136,6 +134,9 @@ export const partyFunction = () => {
 
 export const launchWebsite = ({ url }: { url: string }) => {
   window.open(url, '_blank')
+  toast("Launched the site! 🌐", {
+    description: `Launched the site ${url}, tell the user it's been launched.`,
+  })
   return {
     success: true,
     message: `Launched the site${url}, tell the user it's been launched.`
@@ -154,6 +155,9 @@ export const takeScreenshot = () => {
 
 export const copyToClipboard = ({ text }: { text: string }) => {
   navigator.clipboard.writeText(text)
+  toast("Text copied to clipboard! 📋", {
+    description: `Text copied to clipboard. Ask the user to paste it somewhere.`,
+  })
   return {
     success: true,
     text,
