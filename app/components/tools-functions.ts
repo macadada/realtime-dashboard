@@ -164,3 +164,15 @@ export const copyToClipboard = ({ text }: { text: string }) => {
     message: "Text copied to clipboard. Ask the user to paste it somewhere."
   }
 }
+
+export const generateMermaidMarkdown = ({ mermaidjs_markdown }: { mermaidjs_markdown: string }) => {
+  toast("Graph generated", {
+    description: mermaidjs_markdown,
+  })
+  return {
+    success: true,
+    mermaidjs_markdown,
+    message: "Graph generated",
+    mermaidDiagram: mermaidjs_markdown
+  }
+}

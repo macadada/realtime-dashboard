@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useEffect, useState } from "react"
+import React, { useEffect, useState, useCallback } from "react"
 import useWebRTCAudioSession from "@/hooks/use-webrtc"
 import { tools } from "@/lib/tools"
 import { Hero } from "./components/Hero"
@@ -11,12 +11,14 @@ import { TokenUsageDisplay } from "./components/TokenUsageDisplay"
 import { MessageControls } from "./components/MessageControls"
 import { ToolsEducation } from "./components/ToolsEducation"
 import { motion } from "framer-motion"
-import { timeFunction, backgroundFunction, partyFunction, launchWebsite, takeScreenshot, copyToClipboard } from "./components/tools-functions"
+import { timeFunction, backgroundFunction, partyFunction, launchWebsite, takeScreenshot, copyToClipboard, generateMermaidMarkdown } from "./components/tools-functions"
 import { Toaster } from "@/components/ui/sonner"
+import OrbShowcase from "@/components/OrbShowcase"
 
 const App: React.FC = () => {
   // State for voice selection
   const [voice, setVoice] = useState("ash")
+  const [currentMermaidDiagram, setCurrentMermaidDiagram] = useState<string | undefined>(undefined);
 
   // WebRTC Audio Session Hook
   const {
@@ -25,8 +27,28 @@ const App: React.FC = () => {
     registerFunction,
     handleStartStopClick,
     msgs,
-    conversation
+    conversation,
+    currentVolume,
+    setIsSessionActive
   } = useWebRTCAudioSession(voice, tools)
+
+  // Add keyboard shortcut handler
+  const handleKeyPress = useCallback((event: KeyboardEvent) => {
+    if (event.shiftKey && event.code === 'Space') {
+      setIsSessionActive(prev => !prev);
+      const testDiagram = `graph TD
+        A[Start] --> B{Is it?}
+        B -->|Yes| C[OK]
+        B -->|No| D[End]`;
+      console.log('Setting diagram:', testDiagram);
+      setCurrentMermaidDiagram(testDiagram);
+    }
+  }, [setCurrentMermaidDiagram]);
+
+  useEffect(() => {
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [handleKeyPress]);
 
   useEffect(() => {
     // Register all functions
@@ -36,53 +58,116 @@ const App: React.FC = () => {
     registerFunction('launchWebsite', launchWebsite)
     registerFunction('takeScreenshot', takeScreenshot)
     registerFunction('copyToClipboard', copyToClipboard)
+    registerFunction('generateMermaidMarkdown', (input: { mermaidjs_markdown: string }) => {
+      const result = generateMermaidMarkdown(input);
+      if (result.success) {
+        setCurrentMermaidDiagram(result.mermaidDiagram);
+      }
+      return result;
+    })
   }, [registerFunction])
 
   return (
-    <main className="h-full">
-      <motion.div 
-        className="container flex flex-col items-center justify-center mx-auto max-w-3xl my-20 p-12 border rounded-lg shadow-xl"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
+    <motion.main 
+      className="flex-1 w-full"
+      animate={{ 
+        maxWidth: isSessionActive ? "100%" : "768px",
+        margin: isSessionActive ? "0" : "0 auto"
+      }}
+      transition={{ 
+        duration: 0.6,
+        ease: [0.4, 0, 0.2, 1]
+      }}
+    >
+      <div className="w-full px-5">
         <Hero />
         
-        <motion.div 
-          className="w-full max-w-md bg-card text-card-foreground rounded-xl border shadow-sm p-6 space-y-4"
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.4 }}
-        >
-          <VoiceSelector value={voice} onValueChange={setVoice} />
-          
-          <div className="flex flex-col items-center gap-4">
-            <BroadcastButton 
-              isSessionActive={isSessionActive} 
-              onClick={handleStartStopClick}
-            />
-          </div>
-          {status && <TokenUsageDisplay messages={msgs} />}
-          {status && (
+        <div className={`w-full ${isSessionActive ? 'flex gap-6' : ''}`}>
+          {/* Left column */}
+          <motion.div 
+            className={isSessionActive ? 'w-[400px] shrink-0' : 'w-full'}
+            layout
+            transition={{ 
+              duration: 0.6,
+              ease: [0.4, 0, 0.2, 1]
+            }}
+          >
+            {isSessionActive && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5 }}
+              >
+                <OrbShowcase 
+                  status={status.includes('established') ? 'connected' : 'disconnected'}
+                  conversation={conversation}
+                  msgs={msgs}
+                  currentVolume={currentVolume}
+                />
+              </motion.div>
+            )}
+            
+            <VoiceSelector value={voice} onValueChange={setVoice} />
+            
+            <div className="flex flex-col items-center gap-4">
+              <BroadcastButton 
+                isSessionActive={isSessionActive} 
+                onClick={handleStartStopClick}
+              />
+            </div>
+          </motion.div>
+
+          {/* Right column */}
+          {isSessionActive && (
             <motion.div 
-              className="w-full flex flex-col gap-2"
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              transition={{ duration: 0.3 }}
+              className="flex-1 min-w-0"
+              initial={{ opacity: 0, x: 40 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ 
+                duration: 0.6,
+                ease: [0.4, 0, 0.2, 1]
+              }}
             >
-              <MessageControls conversation={conversation} msgs={msgs} />
+              {status && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.2 }}
+                >
+                  <TokenUsageDisplay messages={msgs} />
+                </motion.div>
+              )}
+              <motion.div 
+                className="flex flex-col gap-2"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.4, delay: 0.3 }}
+              >
+                <MessageControls 
+                  conversation={conversation} 
+                  msgs={msgs}
+                  mermaidDiagram={currentMermaidDiagram}
+                />
+              </motion.div>
+              {status && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.4, delay: 0.4 }}
+                >
+                  <StatusDisplay status={status} />
+                </motion.div>
+              )}
             </motion.div>
           )}
-        </motion.div>
-        
-        {status && <StatusDisplay status={status} />}
-        <div className="w-full flex flex-col items-center gap-4">
+        </div>
+
+        <div className="w-full flex flex-col items-center gap-4 mt-6">
           <ToolsEducation />
         </div>
-      </motion.div>
+      </div>
       <Toaster />
-    </main>
+    </motion.main>
   )
 }
 

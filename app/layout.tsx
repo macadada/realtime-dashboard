@@ -40,7 +40,7 @@ export default function RootLayout({
       </head>
       <body
         className={cn(
-          "min-h-dvh bg-background font-sans antialiased",
+          "min-h-screen bg-background font-sans antialiased",
           geistSans.variable
         )}
       >
@@ -50,12 +50,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <div className="relative flex min-h-dvh flex-col bg-background items-center">
+          <div className="relative flex min-h-screen flex-col bg-background">
             <div className="w-full bg-gradient-to-r from-gray-900 to-gray-700">
             </div>
-            <main className="flex flex-1 justify-center items-start">
-              {children}
-            </main>
+            {children}
           </div>
           <Toaster />
         </ThemeProvider>

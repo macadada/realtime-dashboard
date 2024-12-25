@@ -51,7 +51,16 @@ const toolDefinitions = {
     takeScreenshot: {
         description: 'Takes a screenshot of the current page',
         parameters: {}
-    }
+    },
+    generateMermaidMarkdown: {
+        description: 'Generate markdown for mermaid.js for only chart types that mermaid supports and only return the markdown that can be pasted into a mermaid.js viewer. For barcharts/linecharts use the following chart type and example: xychart-beta\n    title SalesRevenue\n    x-axis [jan, feb, mar, apr, may, jun, jul, aug, sep, oct, nov, dec]\n    y-axis "Revenue (in $)" 4000 --> 11000\n    bar [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]\n    line [5000, 6000, 7500, 8200, 9500, 10500, 11000, 10200, 9200, 8500, 7000, 6000]',
+        parameters: {
+            mermaidjs_markdown: {
+              type: 'string',
+              description: 'The full mermaid js markdown including graph type, extra styles, etc. Only the markdown output, not the surrounding code block.'
+            }
+          }
+      }
 } as const;
 
 const tools: Tool[] = Object.entries(toolDefinitions).map(([name, config]) => ({

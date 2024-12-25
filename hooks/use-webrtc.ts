@@ -318,7 +318,8 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
     registerFunction,
     msgs,
     currentVolume,
-    conversation
+    conversation,
+    setIsSessionActive,
   };
 };
 
