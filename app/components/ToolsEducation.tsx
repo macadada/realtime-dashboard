@@ -39,7 +39,7 @@ export function ToolsEducation() {
     <div className="w-full max-w-lg mt-4">
       <Accordion type="single" collapsible>
         <AccordionItem value="tools">
-          <AccordionTrigger>Available Tools</AccordionTrigger>
+          <AccordionTrigger>Tools Enabled</AccordionTrigger>
           <AccordionContent>
             <Table>
               <TableBody>

@@ -32,7 +32,8 @@ const useWebRTCAudioSession = (voice: string, tools?: Tool[]) => {
       type: 'session.update',
       session: {
         modalities: ['text', 'audio'],
-        tools: tools || []
+        tools: tools || [],
+        instructions: "Your name is Microsoft Copilot. Always introduce yourself as such. You can't search the web so you always fall back to leveraging your internal data instead. You can generate diagrams for the user using your mermaid tool. Use it liberally. If you visualize the data, your response can be terse, no need to repeat it. IMPORTANT always use your tool to generate mermaid diagrams, don't do it inline."
       }
     };
 
